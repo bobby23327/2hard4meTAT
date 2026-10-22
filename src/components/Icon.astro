@@ -1,0 +1,50 @@
+---
+interface Props {
+  name:
+    | 'arrow'
+    | 'external'
+    | 'github'
+    | 'sun'
+    | 'moon'
+    | 'menu'
+    | 'search'
+    | 'close'
+    | 'code'
+    | 'layers'
+    | 'grid'
+    | 'download'
+    | 'rss'
+    | 'plus';
+  size?: number;
+}
+const { name, size = 20 } = Astro.props;
+const paths: Record<Props['name'], string> = {
+  arrow: 'M4 12h15m-6-6 6 6-6 6',
+  external: 'M7 17 17 7M7 7h10v10',
+  github:
+    'M9 19c-4 1-4-2-6-2m12 5v-4c0-1 .1-1.6-.5-2.2 3.2-.4 6.5-1.6 6.5-7A5.4 5.4 0 0 0 19.5 5a5 5 0 0 0-.1-3S18.2 1.6 15.5 3a13 13 0 0 0-7 0C5.8 1.6 4.6 2 4.6 2a5 5 0 0 0-.1 3A5.4 5.4 0 0 0 3 8.8c0 5.4 3.3 6.6 6.5 7-.6.6-.6 1.2-.5 2.2v4',
+  sun: 'M12 2v2m0 16v2M2 12h2m16 0h2M5 5l1.5 1.5m11 11L19 19M5 19l1.5-1.5m11-11L19 5M16 12a4 4 0 1 1-8 0 4 4 0 0 1 8 0',
+  moon: 'M20 14A8 8 0 0 1 10 4a8 8 0 1 0 10 10Z',
+  menu: 'M4 7h16M4 12h16M4 17h16',
+  search: 'm20 20-5-5M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0',
+  close: 'm6 6 12 12M6 18 18 6',
+  code: 'm8 6-6 6 6 6m8-12 6 6-6 6m-3-15-2 18',
+  layers: 'm12 3 10 5-10 5L2 8l10-5Zm-10 9 10 5 10-5M2 16l10 5 10-5',
+  grid: 'M3 3h7v7H3zM14 3h7v7h-7zM3 14h7v7H3zM14 14h7v7h-7z',
+  download: 'M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5',
+  rss: 'M4 11a9 9 0 0 1 9 9M4 4a16 16 0 0 1 16 16M5 19h.01',
+  plus: 'M12 5v14M5 12h14',
+};
+---
+
+<svg
+  width={size}
+  height={size}
+  viewBox="0 0 24 24"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="1.5"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-hidden="true"><path d={paths[name]}></path></svg
+>

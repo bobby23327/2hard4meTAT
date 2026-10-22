@@ -1,0 +1,124 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import HeroVisual from '../components/HeroVisual.astro';
+import ProjectCard from '../components/ProjectCard.astro';
+import ArticleRow from '../components/ArticleRow.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import { sortProjects } from '../lib/content';
+import { profile } from '../data/profile';
+const projects = sortProjects(await getCollection('projects'));
+const articles = (await getCollection('blog')).sort(
+  (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
+);
+---
+
+<BaseLayout>
+  <div class="container">
+    <section class="hero">
+      <div class="hero-copy">
+        <div class="eyebrow">
+          <span class="status-dot"></span>
+          {profile.graduation} 届 · {profile.major} · 寻找同路人
+        </div><h1>
+          让想法<br />运行<span class="hero-serif">起来</span><span class="accent">.</span>
+        </h1><p class="hero-intro">
+          {profile.heroDescription}<br />我是{profile.university}的{profile.major}学生，{
+            profile.heroPersonalNote
+          }
+        </p><div class="hero-actions">
+          <a class="button primary" href="/projects/">探索我的项目 <Icon name="arrow" size={18} /></a><a
+            class="button quiet"
+            href="/about/">关于我 <Icon name="external" size={18} /></a
+          >
+        </div><div class="hero-footnote mono">
+          <span>{profile.universityEnglish}</span><span class="small-divider"></span><span
+            >CLASS OF {profile.graduation}</span
+          >
+        </div>
+      </div>
+      <HeroVisual />
+    </section>
+    <div class="direction-strip">
+      <span class="strip-label mono">FOCUS AREAS</span><a href="/projects/?track=game"
+        ><Icon name="grid" size={17} />Game Development<span>01</span></a
+      ><a href="/projects/?track=engine"><Icon name="code" size={18} />C++ Systems<span>02</span></a><a
+        href="/projects/?track=agent"><Icon name="layers" size={18} />Agent Infrastructure<span>03</span></a
+      >
+    </div>
+    <section class="section featured-section">
+      <SectionHeading
+        index="01"
+        title="精选项目"
+        english="SELECTED PROJECTS"
+        href="/projects/"
+        linkText="全部项目"
+      /><div class="project-grid">
+        {
+          projects
+            .filter((p) => p.data.featured)
+            .slice(0, 3)
+            .map((project, index) => <ProjectCard project={project} index={index} />)
+        }
+      </div>
+    </section>
+    <section class="section engineering-section">
+      <SectionHeading index="02" title="深入工程" english="UNDER THE HOOD" /><div class="engineering-layout">
+        <div class="engineering-intro">
+          <span class="eyebrow">BEYOND THE SURFACE</span><h3>好体验的背后，<br />是有依据的设计。</h3><p>
+            从运行时架构到编辑器工具，记录系统如何拆分、协作与演进。
+          </p><a class="text-link" href="/projects/?track=engine"
+            >探索工程实践 <Icon name="arrow" size={17} /></a
+          >
+        </div><div class="engineering-rows">
+          <a href="/projects/mcards/"
+            ><span class="engineering-number mono">01</span><div>
+              <span class="mono">ARCHITECTURE / C#</span><h4>让模拟逻辑独立于游戏引擎</h4><p>
+                纯 C# 核心 · 命令接口 · 只读状态快照
+              </p>
+            </div><Icon name="external" /></a
+          ><a href="/projects/unreal-tools/"
+            ><span class="engineering-number mono">02</span><div>
+              <span class="mono">ENGINE & TOOLS / C++</span><h4>走进 Unreal 编辑器</h4><p>
+                反射属性路径 · Details 面板 · Slate 控件
+              </p>
+            </div><Icon name="external" /></a
+          ><a href="/projects/agent-infrastructure/"
+            ><span class="engineering-number mono">03</span><div>
+              <span class="mono">AGENT INFRASTRUCTURE</span><h4>探索 Agent 的执行边界</h4><p>
+                工作流与任务隔离 · 内容整理中
+              </p>
+            </div><Icon name="external" /></a
+          >
+        </div>
+      </div>
+    </section>
+    <section class="section">
+      <SectionHeading
+        index="03"
+        title="技术札记"
+        english="ENGINEERING NOTES"
+        href="/blog/"
+        linkText="全部文章"
+      /><div class="article-list">
+        {articles.slice(0, 3).map((article) => <ArticleRow article={article} />)}
+      </div>
+    </section>
+    <section class="home-contact">
+      <div>
+        <span class="eyebrow">LET'S BUILD SOMETHING</span><h2>下一段旅程，希望一起构建。</h2><p>
+          关注{profile.location}的{profile.opportunityFocus}机会。
+        </p>
+      </div><div class="contact-actions">
+        <a class="button primary" href="/about/#contact">联系与简历 <Icon name="external" size={18} /></a>{
+          profile.github && (
+            <a class="text-link" href={profile.github}>
+              GitHub <Icon name="github" size={17} />
+            </a>
+          )
+        }
+      </div>
+    </section>
+  </div>
+</BaseLayout>

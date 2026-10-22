@@ -1,0 +1,74 @@
+---
+import Icon from './Icon.astro';
+interface Media {
+  src: string;
+  alt: string;
+  caption: string;
+}
+interface Props {
+  media: Media[];
+  title: string;
+}
+const { media, title } = Astro.props;
+const first = media[0];
+if (!first) throw new RangeError('A media gallery requires at least one image.');
+---
+
+<section class="media-gallery" aria-label={`${title}媒体画廊`} data-gallery>
+  <figure class="gallery-main">
+    <button type="button" data-open-gallery aria-label="放大当前图片"
+      ><img
+        data-gallery-image
+        src={first.src}
+        alt={first.alt}
+        width="1200"
+        height="750"
+        fetchpriority="high"
+      /><span class="gallery-expand"><Icon name="plus" size={18} /> 放大查看</span></button
+    ><figcaption data-gallery-caption>{first.caption}</figcaption>
+  </figure>
+  <div class="gallery-thumbnails" role="group" aria-label="选择图片">
+    {
+      media.map((item, index) => (
+        <button
+          type="button"
+          data-gallery-thumb
+          data-src={item.src}
+          data-alt={item.alt}
+          data-caption={item.caption}
+          aria-label={`查看图片 ${index + 1}：${item.alt}`}
+          aria-pressed={index === 0}
+        >
+          <>
+            <img src={item.src} alt="" width="120" height="75" loading="lazy" />
+            <span class="mono">0{index + 1}</span>
+          </>
+        </button>
+      ))
+    }
+  </div>
+  <dialog class="lightbox" aria-label={`${title}图片查看器`}>
+    <div class="lightbox-controls">
+      <span class="mono">PROJECT GALLERY</span><button
+        class="icon-button"
+        type="button"
+        data-close-gallery
+        aria-label="关闭图片查看器"><Icon name="close" size={24} /></button>
+    </div><img
+      data-lightbox-image
+      src={first.src}
+      alt={first.alt}
+      width="1200"
+      height="750"
+      loading="lazy"
+    /><div class="lightbox-footer">
+      <button class="button quiet" type="button" data-gallery-previous aria-label="上一张图片"
+        >← 上一张</button
+      ><p data-lightbox-caption>{first.caption}</p><button
+        class="button quiet"
+        type="button"
+        data-gallery-next
+        aria-label="下一张图片">下一张 →</button>
+    </div>
+  </dialog>
+</section>

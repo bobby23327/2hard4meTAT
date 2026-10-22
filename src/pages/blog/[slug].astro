@@ -1,0 +1,95 @@
+---
+import { getCollection, render } from 'astro:content';
+import type { CollectionEntry } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import TableOfContents from '../../components/TableOfContents.astro';
+import { formatDate, getReadingTime } from '../../lib/content';
+import { profile } from '../../data/profile';
+export async function getStaticPaths() {
+  return (await getCollection('blog')).map((article) => ({
+    params: { slug: article.id },
+    props: { article },
+  }));
+}
+interface Props {
+  article: CollectionEntry<'blog'>;
+}
+const { article } = Astro.props;
+const { Content, headings } = await render(article);
+const articles = (await getCollection('blog')).sort(
+  (a, b) => a.data.publishedAt.valueOf() - b.data.publishedAt.valueOf() || a.id.localeCompare(b.id),
+);
+const position = articles.findIndex((item) => item.id === article.id);
+const previous = articles[position - 1];
+const next = articles[position + 1];
+---
+
+<BaseLayout title={article.data.title} description={article.data.description} article>
+  <div class="container blog-detail">
+    <a class="back-link" href="/blog/">← 返回技术札记</a><header class="article-header">
+      <div class="eyebrow">{article.data.category} / ENGINEERING NOTES</div><h1>{article.data.title}</h1><p>
+        {article.data.description}
+      </p><div class="article-byline">
+        <time datetime={article.data.publishedAt.toISOString()}>{formatDate(article.data.publishedAt)}</time
+        ><span>{getReadingTime(article.body ?? '')} 分钟阅读</span>{
+          article.data.updatedAt && <span>更新于 {formatDate(article.data.updatedAt)}</span>
+        }<span>{profile.name}</span>
+      </div><div class="tags">
+        {
+          article.data.tags.map((tag) => (
+            <a class="tag" href={`/blog/?tag=${encodeURIComponent(tag)}`}>
+              {tag}
+            </a>
+          ))
+        }
+      </div>
+    </header>
+    <div class="reading-layout">
+      <article class="prose" data-article>
+        <Content /><div class="article-end">
+          <span class="brand-symbol" aria-hidden="true">[<i></i>]</span><p>
+            把过程记录下来，让下一次构建更进一步。
+          </p>
+        </div>
+      </article><TableOfContents headings={headings} />
+    </div>
+    <nav class="post-navigation" aria-label="相邻文章">
+      {
+        previous ? (
+          <a href={`/blog/${previous.id}/`}>
+            <>
+              <span>← 上一篇</span>
+              <strong>{previous.data.title}</strong>
+            </>
+          </a>
+        ) : (
+          <a href="/blog/">
+            <>
+              <span>← 文章列表</span>
+              <strong>探索全部技术札记</strong>
+            </>
+          </a>
+        )
+      }{
+        next ? (
+          <a href={`/blog/${next.id}/`}>
+            <>
+              <span>下一篇 →</span>
+              <strong>{next.data.title}</strong>
+            </>
+          </a>
+        ) : (
+          <a href="/projects/">
+            <>
+              <span>继续阅读 →</span>
+              <strong>看看这些思考来自哪些项目</strong>
+            </>
+          </a>
+        )
+      }
+    </nav>
+  </div>
+  <script>
+    import '../../scripts/reading';
+  </script>
+</BaseLayout>

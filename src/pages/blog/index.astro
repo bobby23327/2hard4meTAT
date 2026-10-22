@@ -1,0 +1,60 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleRow from '../../components/ArticleRow.astro';
+import Icon from '../../components/Icon.astro';
+const articles = (await getCollection('blog')).sort(
+  (a, b) => b.data.publishedAt.valueOf() - a.data.publishedAt.valueOf(),
+);
+const tags = [...new Set(articles.flatMap((article) => article.data.tags))];
+---
+
+<BaseLayout title="技术札记" description="记录游戏架构、交互设计与工程验证中的问题、取舍和思考。">
+  <div class="container listing-page blog-listing" data-filter-root="blog">
+    <header class="page-intro">
+      <div class="eyebrow">ENGINEERING NOTES / 技术札记</div><h1>
+        代码之外，思考之中<span class="accent">.</span>
+      </h1><p>记录一次设计的来由，一个问题的解法，以及下一步的思考。</p>
+    </header>
+    <form class="filter-toolbar" role="search" action="/blog/">
+      <label class="search-field"
+        ><Icon name="search" size={18} /><input
+          type="search"
+          name="q"
+          placeholder="搜索文章、主题或关键词"
+          aria-label="搜索文章"
+          autocomplete="off"
+          data-search-input
+        /><kbd>/</kbd></label
+      ><a class="text-link rss-link" href="/rss.xml"><Icon name="rss" size={17} /> RSS 订阅</a><button
+        class="sr-only"
+        type="submit">搜索</button>
+    </form>
+    <div class="filter-tabs blog-filter-tabs" role="group" aria-label="按文章标签筛选">
+      <button type="button" class="active" aria-pressed="true" data-tag-filter="">全部文章</button>{
+        tags.map((tag) => (
+          <button type="button" aria-pressed="false" data-tag-filter={tag}>
+            {tag}
+          </button>
+        ))
+      }
+    </div>
+    <div class="filter-meta">
+      <span>工程笔记 · 从原理到实现</span><p data-result-count role="status" aria-live="polite">
+        显示 {articles.length} 篇文章
+      </p>
+    </div>
+    <div class="article-list" data-results>
+      {articles.map((article) => <ArticleRow article={article} filterable />)}
+    </div>
+    <div class="empty-state" data-empty hidden>
+      <Icon name="search" size={32} /><h2>这个主题还在探索中。</h2><p>
+        试试其他关键词，或浏览全部札记。
+      </p><button class="button secondary" type="button" data-reset-filters>重置筛选</button>
+    </div>
+    <noscript><p class="notice">当前展示全部文章。启用 JavaScript 后可搜索或按标签筛选。</p></noscript>
+  </div>
+  <script>
+    import '../../scripts/filters';
+  </script>
+</BaseLayout>

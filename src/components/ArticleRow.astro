@@ -1,0 +1,38 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { formatDate, getReadingTime } from '../lib/content';
+import Icon from './Icon.astro';
+interface Props {
+  article: CollectionEntry<'blog'>;
+  filterable?: boolean;
+}
+const { article, filterable = false } = Astro.props;
+---
+
+<article
+  class="article-row"
+  data-filter-item={filterable || undefined}
+  data-tags={JSON.stringify(article.data.tags)}
+  data-search={`${article.data.title} ${article.data.description} ${article.data.tags.join(' ')}`}
+>
+  <div class="article-date mono">
+    <time datetime={article.data.publishedAt.toISOString()}>{formatDate(article.data.publishedAt)}</time><span
+      >{getReadingTime(article.body ?? '')} 分钟阅读</span>
+  </div>
+  <div class="article-summary">
+    <span class="article-category">{article.data.category}</span><h3>
+      <a href={`/blog/${article.id}/`}>{article.data.title}</a>
+    </h3><p>{article.data.description}</p><div class="article-tags">
+      {
+        article.data.tags.map((tag) => (
+          <a href={`/blog/?tag=${encodeURIComponent(tag)}`} data-blog-tag={filterable ? tag : undefined}>
+            #{tag}
+          </a>
+        ))
+      }
+    </div>
+  </div>
+  <a class="article-arrow" href={`/blog/${article.id}/`} aria-label={`阅读：${article.data.title}`}
+    ><Icon name="external" size={24} /></a
+  >
+</article>

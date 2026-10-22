@@ -1,0 +1,142 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Icon from '../components/Icon.astro';
+import SectionHeading from '../components/SectionHeading.astro';
+import { profile } from '../data/profile';
+import { tracks } from '../data/tracks';
+import { sortProjects } from '../lib/content';
+const projects = sortProjects(await getCollection('projects')).filter((p) => p.data.featured);
+---
+
+<BaseLayout
+  title="关于"
+  description={`${profile.university}${profile.major}专业 ${profile.graduation} 届${profile.degree}生，${profile.description}`}
+>
+  <div class="container about-page">
+    <header class="page-intro about-intro">
+      <div>
+        <div class="eyebrow">ABOUT / 关于我</div><h1>
+          保持好奇，<br />认真构建<span class="accent">.</span>
+        </h1><p>
+          我是{profile.personName && `${profile.personName}，`}{profile.university}{profile.major}专业的 {
+            profile.graduation
+          } 届{profile.degree}生。<br />{profile.biographyDescription}
+        </p>
+      </div><div class="about-mark" aria-hidden="true">
+        <span>{'{'}<i>build</i>{'}'}</span><span class="mono">CURIOSITY → CRAFT</span>
+      </div>
+    </header>
+    <section class="about-education">
+      <div class="eyebrow">EDUCATION</div><h2>{profile.university}</h2><div>
+        <p>{profile.major} · {profile.degree}</p><span>{profile.graduation} 届</span>
+      </div><span class="education-note">求职方向 / {profile.location} · {profile.opportunityFocus}</span>
+    </section>
+    <section class="section">
+      <SectionHeading index="01" title="我关注的方向" english="INTERESTS & CRAFT" /><div
+        class="interest-grid"
+      >
+        {
+          tracks.map((track, index) => (
+            <a href={`/projects/?track=${track.id}`}>
+              <>
+                <span class="mono interest-number">0{index + 1} /</span>
+                <h3>{track.english}</h3>
+                <p>{track.description}</p>
+                <span class="text-link">
+                  查看相关项目 <Icon name="external" size={17} />
+                </span>
+              </>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+    <section class="section">
+      <SectionHeading index="02" title="工程能力与实践" english="TOOLBOX" /><div class="skills-table">
+        <div><span>游戏与交互</span><p>C# · Unity · Godot · 数据驱动设计 · 游戏状态管理</p></div><div>
+          <span>引擎与工具</span><p>C++ · UE4.24 · Slate · Reflection · 编辑器扩展研究</p>
+        </div><div><span>架构与系统</span><p>模块边界 · 命令与快照 · 任务调度 · 程序化生成</p></div><div>
+          <span>正在探索</span><p>Agent 工作流 · 工具调用协议 · 执行隔离与容错</p>
+        </div>
+      </div>
+    </section>
+    <section class="section">
+      <SectionHeading index="03" title="代表作品" english="IN PRACTICE" /><div class="about-projects">
+        {
+          projects.map((project) => (
+            <a href={`/projects/${project.id}/`}>
+              <>
+                <span>{project.data.title}</span>
+                <p>{project.data.subtitle}</p>
+                <Icon name="external" />
+              </>
+            </a>
+          ))
+        }
+      </div>
+    </section>
+    <section class="about-open-source">
+      <h2>开源与竞赛</h2><p>公开记录整理中，后续将补充可查阅的仓库、贡献记录与竞赛材料。</p>
+    </section>
+    <section id="contact" class="contact-section">
+      <div class="eyebrow">LET'S CONNECT / 联系与简历</div><h2>聊聊下一次构建。</h2><p>
+        {profile.opportunityDescription}
+      </p><div class="contact-link-grid">
+        {
+          profile.email ? (
+            <a href={`mailto:${profile.email}`}>
+              <>
+                <span>EMAIL</span>
+                <strong>{profile.email} ↗</strong>
+              </>
+            </a>
+          ) : (
+            <div>
+              <>
+                <span>EMAIL</span>
+                <strong>联系方式待补充</strong>
+              </>
+            </div>
+          )
+        }{
+          profile.github ? (
+            <a href={profile.github} target="_blank" rel="noopener noreferrer">
+              <>
+                <span>GITHUB</span>
+                <strong>
+                  查看公开代码 <Icon name="github" />
+                </strong>
+              </>
+            </a>
+          ) : (
+            <div>
+              <>
+                <span>GITHUB</span>
+                <strong>公开主页整理中</strong>
+              </>
+            </div>
+          )
+        }{
+          profile.resume ? (
+            <a href={profile.resume} download>
+              <>
+                <span>RÉSUMÉ</span>
+                <strong>
+                  下载简历 <Icon name="download" />
+                </strong>
+              </>
+            </a>
+          ) : (
+            <div>
+              <>
+                <span>RÉSUMÉ</span>
+                <strong>简历 PDF 待补充</strong>
+              </>
+            </div>
+          )
+        }
+      </div>
+    </section>
+  </div>
+</BaseLayout>

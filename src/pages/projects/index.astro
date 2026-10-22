@@ -1,0 +1,70 @@
+---
+import { getCollection } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ProjectCard from '../../components/ProjectCard.astro';
+import Icon from '../../components/Icon.astro';
+import { sortProjects } from '../../lib/content';
+import { tracks } from '../../data/tracks';
+const projects = sortProjects(await getCollection('projects'));
+const tags = [...new Set(projects.flatMap((project) => project.data.tags))];
+---
+
+<BaseLayout
+  title="项目"
+  description="探索游戏原型、Unreal 编辑器研究与 Agent 工程方向，阅读架构设计、实现过程和验证思路。"
+>
+  <div class="container listing-page" data-filter-root="projects">
+    <header class="page-intro">
+      <div class="eyebrow">SELECTED WORK / 项目作品集</div><h1>
+        从想法，到可运行的世界<span class="accent">.</span>
+      </h1><p>游戏、工具与系统。每个项目，都是一次把问题想清楚的练习。</p>
+    </header>
+    <form class="filter-toolbar" role="search" action="/projects/">
+      <label class="search-field"
+        ><Icon name="search" size={18} /><input
+          type="search"
+          name="q"
+          placeholder="搜索项目、技术或关键词"
+          aria-label="搜索项目"
+          autocomplete="off"
+          data-search-input
+        /><kbd>/</kbd></label
+      ><label class="sort-field"
+        >排序<select name="sort" data-sort
+          ><option value="featured">精选优先</option><option value="name">项目名称</option></select
+        ></label
+      ><button class="sr-only" type="submit">搜索</button>
+    </form>
+    <div class="filter-tabs" role="group" aria-label="按项目方向筛选">
+      <button type="button" class="active" aria-pressed="true" data-track-filter="all"
+        >全部项目 <span>{projects.length}</span></button
+      >{
+        tracks.map((track) => (
+          <button type="button" aria-pressed="false" data-track-filter={track.id}>
+            {track.label}
+            <span>{projects.filter((p) => p.data.track === track.id).length}</span>
+          </button>
+        ))
+      }
+    </div>
+    <div class="filter-meta">
+      <div class="tag-select">
+        <label for="project-tag">技术栈</label><select id="project-tag" data-tag-select
+          ><option value="">全部技术</option>{tags.map((tag) => <option value={tag}>{tag}</option>)}</select>
+      </div><p data-result-count role="status" aria-live="polite">显示 {projects.length} 个项目</p>
+    </div>
+    <div class="project-grid project-list-grid" data-results>
+      {projects.map((project, index) => <ProjectCard project={project} index={index} filterable />)}
+    </div>
+    <div class="empty-state" data-empty hidden>
+      <Icon name="search" size={32} /><h2>换个关键词，再探索一下。</h2><p>
+        试试 Unity、C# 或游戏开发。
+      </p><button class="button secondary" type="button" data-reset-filters>重置筛选</button>
+    </div>
+    <noscript><p class="notice">当前展示全部项目。启用 JavaScript 后可使用搜索和筛选。</p></noscript>
+    <p class="listing-note">封面为项目概念示意，具体实现与进度见项目详情。</p>
+  </div>
+  <script>
+    import '../../scripts/filters';
+  </script>
+</BaseLayout>

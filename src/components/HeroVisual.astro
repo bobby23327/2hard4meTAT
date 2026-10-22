@@ -1,0 +1,70 @@
+---
+import { profile } from '../data/profile';
+---
+
+<div class="hero-visual" aria-label="交互、系统与工程的概念示意">
+  <div class="visual-top mono">
+    <span><i class="status-dot"></i> THE ENGINEERING SANDBOX</span><span>v.{profile.graduation}</span>
+  </div>
+  <svg class="system-art" viewBox="0 0 560 340" fill="none" aria-hidden="true">
+    <defs
+      ><pattern id="hero-grid" width="30" height="30" patternUnits="userSpaceOnUse"
+        ><path d="M30 0H0V30" stroke="currentColor" stroke-opacity=".055"></path></pattern
+      ><linearGradient id="cube-face" x1="200" y1="70" x2="350" y2="270" gradientUnits="userSpaceOnUse"
+        ><stop stop-color="var(--accent)" stop-opacity=".18"></stop><stop
+          offset="1"
+          stop-color="var(--accent)"
+          stop-opacity=".02"></stop></linearGradient
+      ></defs
+    >
+    <rect width="560" height="340" fill="url(#hero-grid)"></rect>
+    <ellipse
+      cx="280"
+      cy="182"
+      rx="214"
+      ry="83"
+      stroke="currentColor"
+      stroke-opacity=".13"
+      stroke-dasharray="3 6"></ellipse>
+    <path d="m280 32 190 109v105L280 355 90 246V141L280 32Z" stroke="currentColor" stroke-opacity=".05"
+    ></path>
+    <g stroke="var(--accent)" stroke-width="1.2"
+      ><path d="m280 63 103 59v118l-103 59-103-59V122l103-59Z" fill="url(#cube-face)"></path><path
+        d="m177 122 103 59 103-59M280 181v118"></path><path
+        d="m177 240 103-59 103 59M280 63v118"
+        stroke-dasharray="4 5"
+        opacity=".3"></path><path d="m280 104 67 39v76l-67 39-67-39v-76l67-39Z" opacity=".45"></path><path
+        d="m213 143 67 39 67-39m-67 39v76"
+        opacity=".45"></path></g
+    >
+    <g stroke="currentColor" stroke-opacity=".26"
+      ><path d="M177 151H105l-20-20H37M383 207h55l20 20h64M280 63V38h85"></path><circle
+        cx="177"
+        cy="151"
+        r="3"
+        fill="var(--accent)"
+        stroke="none"></circle><circle cx="383" cy="207" r="3" fill="var(--accent)" stroke="none"></circle></g
+    >
+    <g fill="currentColor" font-family="Consolas,monospace" font-size="10" letter-spacing="1"
+      ><text x="37" y="119" opacity=".55">01 / INTERACTION</text><text x="425" y="250" opacity=".55"
+        >02 / SYSTEMS</text
+      ><text x="365" y="41" opacity=".55">03 / AGENTS</text><text
+        x="256"
+        y="187"
+        fill="var(--accent)"
+        font-size="13">&lt; / &gt;</text
+      ></g
+    >
+    <g fill="var(--accent)"
+      ><circle cx="90" cy="184" r="3"></circle><circle cx="468" cy="141" r="3"></circle><path
+        d="M66 53v10m-5-5h10M479 289v10m-5-5h10"
+        stroke="var(--accent)"
+        opacity=".5"></path></g
+    >
+  </svg>
+  <div class="visual-bottom">
+    <span class="mono">IDEA → SYSTEM → EXPERIENCE</span><span class="visual-coordinate mono"
+      >BUILD WITH INTENT</span
+    >
+  </div>
+</div>
