@@ -1,5 +1,5 @@
 {
-  "installCommand": "npm ci",
+  "installCommand": "npm ci --include=dev --include=optional",
   "buildCommand": "npm run check && npm run build",
   "outputDirectory": "dist",
   "nodeVersion": "22.11.0",

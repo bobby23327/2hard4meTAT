@@ -63,7 +63,9 @@ npm run preview
 
 代码仓库为 [bobby23327/2hard4meTAT](https://github.com/bobby23327/2hard4meTAT)，生产分支为 `main`。本目录交付时缺少 Git 元数据，首次提交前需关联该远程仓库，并在 EdgeOne 控制台核对 Git 集成。检查改动并运行 `npm run verify` 后，由站点所有者提交和推送。EdgeOne 按生产分支配置触发构建。
 
-仓库内 `edgeone.json` 配置安装命令 `npm ci`、构建命令 `npm run check && npm run build` 和产物目录 `dist`。上线前在平台设置 `SITE_URL` 为真实 HTTPS 站点源地址；本地默认值为 `http://localhost:4321`。
+仓库内 `edgeone.json` 配置安装命令 `npm ci --include=dev --include=optional`、构建命令 `npm run check && npm run build` 和产物目录 `dist`。`.npmrc` 确保开发依赖与平台原生包参与安装，并检查 Node 版本兼容性。上线前在平台设置 `SITE_URL` 为真实 HTTPS 站点源地址；本地默认值为 `http://localhost:4321`。
+
+GitHub Actions 使用 `.nvmrc` 指定的 Node.js 22.11.0，在 Linux 生产环境执行干净安装和 `npm run verify`。构建工具版本的兼容约束见 [部署指南](docs/deployment.md#构建依赖兼容性)。
 
 本次实现保留在本地，推送与发布由站点所有者决定。区域、域名、免费计划及首次部署检查见 [部署指南](docs/deployment.md)。
 

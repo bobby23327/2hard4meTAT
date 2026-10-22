@@ -14,7 +14,7 @@ EdgeOne 官方指南支持 Astro 4+，推荐 Astro 5，并支持 SSG 与 Content
 | --- | --- |
 | 仓库根目录 | 本项目所在目录 |
 | 生产分支 | `main`，与现有关联核对 |
-| 安装命令 | `npm ci` |
+| 安装命令 | `npm ci --include=dev --include=optional` |
 | 构建命令 | `npm run check && npm run build` |
 | 输出目录 | `dist` |
 | Node.js | `22.11.0`，与 `edgeone.json` 一致 |
@@ -23,6 +23,16 @@ EdgeOne 官方指南支持 Astro 4+，推荐 Astro 5，并支持 SSG 与 Content
 `edgeone.json` 已设置安装、构建、输出目录及静态资源缓存头，仓库配置会覆盖对应控制台选项。[配置文档](https://pages.edgeone.ai/document/edgeone-json)
 
 `edgeone.json` 指定官方文档列出的预装版本 `22.11.0`，本地推荐 Node.js 22.11+。首次上线时核对构建日志中的实际版本；升级依赖后同步检查 `engines` 要求，并在对应版本执行安装与构建。[Node 配置说明](https://pages.edgeone.ai/document/edgeone-json)
+
+## 构建依赖兼容性
+
+`astro check` 需要 `@astrojs/check` 和 TypeScript；Vite、Tailwind 使用当前操作系统的原生包。安装命令显式包含 `dev` 与 `optional`，`.npmrc` 同步设置安装策略并启用 `engine-strict`，使 Node 版本问题在安装时暴露。[npm 安装参数](https://docs.npmjs.com/cli/v10/commands/npm-ci/#include)
+
+为匹配 EdgeOne 的 Node.js 22.11.0，项目固定 Vite 6.4.5、`@astrojs/check` 0.9.9，并通过 `overrides` 固定 `@astrojs/language-server` 2.16.16 与 `unifont` 0.7.4。这些版本分别避免自动引入要求更高 Node 版本的 Vite 8 / Rolldown、Astro 检查工具链与 Undici 8。升级前应一起更新锁文件，并通过 Linux CI。
+
+`package-lock.json` 保留 Linux 与 Windows 原生包的可选依赖记录。部署时使用提交的锁文件完成干净安装。若安装日志仍显示旧命令，在控制台确认当前部署的提交 SHA 和项目根目录；首次重试可清除旧构建缓存。
+
+GitHub Actions 的 `Verify site` 工作流在 Linux、Node.js 22.11.0、`NODE_ENV=production` 下执行相同安装命令和 `npm run verify`，覆盖类型检查、静态构建及产物测试。
 
 ## 站点地址与 SEO
 

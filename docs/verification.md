@@ -35,11 +35,11 @@
 
 ## 实际执行结果
 
-本机运行环境为 Node.js 24.19.0。EdgeOne 配置使用官方文档列出的 Node.js 22.11.0；首次上线时按控制台可用版本核对。
+初版在本机 Node.js 24.19.0 验证。针对 EdgeOne 构建失败，现已使用官方 Node.js 22.11.0 在 Windows 下重新完成干净安装和全部检查，并以 `NODE_ENV=production` 验证安装参数可覆盖开发依赖及可选依赖的省略设置。Linux 验证由新增的 `Verify site` 工作流执行，其结果以 GitHub Actions 记录为准。
 
 | 检查                          | 结果                                      |
 | ----------------------------- | ----------------------------------------- |
-| npm 安装与锁文件重装 `npm ci` | 成功                                      |
+| `npm ci --include=dev --include=optional` | Node.js 22.11.0 生产环境下成功 |
 | `npm run verify`              | 成功                                      |
 | Astro / TypeScript 检查       | 32 个文件，0 错误、0 警告、0 提示         |
 | 生产构建                      | 13 页、RSS、robots、Sitemap，输出 `dist/` |
