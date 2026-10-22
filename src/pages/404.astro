@@ -1,4 +1,5 @@
 ---
+import { withBase } from '../lib/urls';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Icon from '../components/Icon.astro';
 ---
@@ -10,9 +11,10 @@ import Icon from '../components/Icon.astro';
     ><h1>探索，偶尔也会走进岔路。</h1><p>这个地址还没有对应的页面，换个方向继续看看。</p><div
       class="hero-actions"
     >
-      <a class="button primary" href="/">返回首页 <Icon name="arrow" size={18} /></a><a
+      <a class="button primary" href={withBase('/')}>返回首页 <Icon name="arrow" size={18} /></a><a
         class="button secondary"
-        href="/projects/">浏览项目</a>
+        href={withBase('/projects/')}>浏览项目</a
+      >
     </div>
   </div></BaseLayout
 >

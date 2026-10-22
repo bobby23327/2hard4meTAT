@@ -1,4 +1,5 @@
 ---
+import { withBase } from '../../lib/urls';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ArticleRow from '../../components/ArticleRow.astro';
@@ -16,7 +17,7 @@ const tags = [...new Set(articles.flatMap((article) => article.data.tags))];
         代码之外，思考之中<span class="accent">.</span>
       </h1><p>记录一次设计的来由，一个问题的解法，以及下一步的思考。</p>
     </header>
-    <form class="filter-toolbar" role="search" action="/blog/">
+    <form class="filter-toolbar" role="search" action={withBase('/blog/')}>
       <label class="search-field"
         ><Icon name="search" size={18} /><input
           type="search"
@@ -26,9 +27,8 @@ const tags = [...new Set(articles.flatMap((article) => article.data.tags))];
           autocomplete="off"
           data-search-input
         /><kbd>/</kbd></label
-      ><a class="text-link rss-link" href="/rss.xml"><Icon name="rss" size={17} /> RSS 订阅</a><button
-        class="sr-only"
-        type="submit">搜索</button>
+      ><a class="text-link rss-link" href={withBase('/rss.xml')}><Icon name="rss" size={17} /> RSS 订阅</a
+      ><button class="sr-only" type="submit">搜索</button>
     </form>
     <div class="filter-tabs blog-filter-tabs" role="group" aria-label="按文章标签筛选">
       <button type="button" class="active" aria-pressed="true" data-tag-filter="">全部文章</button>{

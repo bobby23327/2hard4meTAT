@@ -78,7 +78,7 @@ relatedPosts: []
 | `github` / `demo`    | 可选的有效公开 URL；准备好资源后填写                                          |
 | `relatedPosts`       | 相关文章的文件 ID，例如 `['state-snapshots']`                                 |
 
-文件名使用稳定的英文短横线标识。重命名时同步修订 `relatedPosts`、正文链接和已分享 URL；线上地址迁移可在 `edgeone.json` 中配置重定向。
+文件名使用稳定的英文短横线标识。重命名时同步修订 `relatedPosts`、正文链接和已分享 URL；需要兼容旧地址时，保留带有新链接的静态跳转页面。
 
 项目列表支持 `track`、`q`、`tag` 与 `sort` 查询参数，排序可选 `featured` 或 `name`。例如 `/projects/?track=game&tag=C%23` 展示游戏方向的 C# 项目；`/projects/?q=Unity&sort=name` 按名称查看搜索结果。
 
@@ -118,12 +118,14 @@ category: 工程设计
 
 ## 截图与视频
 
-将截图放到 `public/media/项目名/`。例如 `public/media/mcards/gameplay.webp` 的页面地址为 `/media/mcards/gameplay.webp`。正文图片写明宽高以保留布局空间：
+将截图放到 `public/media/项目名/`。frontmatter 中继续填写 `/media/mcards/gameplay.webp` 这样的站内路径，页面组件会加入部署前缀。MDX 正文中的媒体使用 `withBase` 生成地址；线上地址会以 `/2hard4meTAT/` 开头。图片写明宽高以保留布局空间：
 
 ```mdx
+import { withBase } from '../../lib/urls';
+
 <figure>
   <img
-    src="/media/mcards/gameplay.webp"
+    src={withBase('/media/mcards/gameplay.webp')}
     alt="卡牌进入流程槽后，右侧面板展示执行状态"
     width="1600"
     height="900"
@@ -139,17 +141,19 @@ category: 工程设计
 视频使用原生播放器，让读者主动加载：
 
 ```mdx
+import { withBase } from '../../lib/urls';
+
 <figure>
   <video
     controls
     playsinline
     preload="none"
-    poster="/media/mcards/video-poster.webp"
+    poster={withBase('/media/mcards/video-poster.webp')}
     width="1600"
     height="900"
   >
-    <source src="/media/mcards/demo.mp4" type="video/mp4" />
-    <track kind="captions" src="/media/mcards/demo.zh.vtt" srclang="zh" label="中文" default />
+    <source src={withBase('/media/mcards/demo.mp4')} type="video/mp4" />
+    <track kind="captions" src={withBase('/media/mcards/demo.zh.vtt')} srclang="zh" label="中文" default />
   </video>
   <figcaption>填写演示操作、版本和关键观察。</figcaption>
 </figure>

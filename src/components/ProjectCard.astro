@@ -1,4 +1,5 @@
 ---
+import { withBase } from '../lib/urls';
 import type { CollectionEntry } from 'astro:content';
 import Icon from './Icon.astro';
 import { statusLabels } from '../data/tracks';
@@ -20,8 +21,8 @@ const { data, id } = project;
   data-featured={data.featured ? '1' : '0'}
   data-order={data.order}
 >
-  <a class="project-cover" href={`/projects/${id}/`} tabindex="-1" aria-hidden="true">
-    <img src={data.cover} alt="" width="1200" height="750" loading="lazy" decoding="async" />
+  <a class="project-cover" href={withBase(`/projects/${id}/`)} tabindex="-1" aria-hidden="true">
+    <img src={withBase(data.cover)} alt="" width="1200" height="750" loading="lazy" decoding="async" />
     {data.coverKind === 'concept' && <span class="cover-note">概念示意</span>}
     <span class="cover-arrow"><Icon name="external" /></span>
   </a>
@@ -36,14 +37,14 @@ const { data, id } = project;
       }</span
     ><span class:list={['project-status', data.status]}><i></i>{statusLabels[data.status]}</span>
   </div>
-  <h3><a href={`/projects/${id}/`}>{data.title}<Icon name="external" size={20} /></a></h3>
+  <h3><a href={withBase(`/projects/${id}/`)}>{data.title}<Icon name="external" size={20} /></a></h3>
   <p>{data.description}</p>
   <div class="tags">
     {
       data.tags.slice(0, 3).map((tag) => (
         <a
           class="tag"
-          href={`/projects/?tag=${encodeURIComponent(tag)}`}
+          href={withBase(`/projects/?tag=${encodeURIComponent(tag)}`)}
           data-project-tag={filterable ? tag : undefined}
         >
           {tag}

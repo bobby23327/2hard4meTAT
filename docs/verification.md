@@ -1,6 +1,6 @@
 # 实现与验收记录
 
-验收日期：2026-10-22。工作目录初始为空，当前成果为新建的本地静态网站。
+记录日期：2026-10-22。站点采用 Astro 静态构建，当前部署目标为 GitHub Pages。以下分别记录已完成的验收与本轮迁移检查。
 
 ## 交付范围
 
@@ -17,7 +17,7 @@
 | 文件                                                                     | 实现内容                                                    |
 | ------------------------------------------------------------------------ | ----------------------------------------------------------- |
 | `astro.config.mjs`、`package.json`、`package-lock.json`、`tsconfig.json` | 框架、依赖锁定、构建与严格类型配置                          |
-| `edgeone.json`、`.env.example`、`.nvmrc`                                 | 静态部署、站点源地址和 Node 配置                            |
+| `.github/workflows/deploy.yml`、`.env.example`、`.nvmrc`                 | GitHub Pages 部署、站点源地址、路径和 Node 配置             |
 | `src/layouts/BaseLayout.astro`、`src/styles/global.css`                  | SEO、共享布局、响应式设计系统                               |
 | `src/pages/index.astro`、`about.astro`、`404.astro`                      | 首页、个人资料及错误页                                      |
 | `src/pages/projects/index.astro`、`[slug].astro`                         | 项目筛选列表与案例模板                                      |
@@ -33,25 +33,39 @@
 | `tests/build.test.mjs`                                                   | 静态输出验收测试                                            |
 | `README.md`、`docs/content-guide.md`、`architecture.md`、`deployment.md` | 使用、内容维护、扩展与部署说明                              |
 
-## 实际执行结果
+## 已完成的基础验收
 
-初版在本机 Node.js 24.19.0 验证。针对 EdgeOne 构建失败，现已使用官方 Node.js 22.11.0 在 Windows 下重新完成干净安装和全部检查，并以 `NODE_ENV=production` 验证安装参数可覆盖开发依赖及可选依赖的省略设置。Linux 验证由新增的 `Verify site` 工作流执行，其结果以 GitHub Actions 记录为准。
+初版在本机 Node.js 24.19.0 验证。此前的部署依赖修复已使用 Node.js 22.11.0 在 Windows 下完成干净安装和全部检查，并以 `NODE_ENV=production` 验证安装参数可覆盖开发依赖及可选依赖的省略设置。对应的 Linux 验证见 [GitHub Actions 记录](https://github.com/bobby23327/2hard4meTAT/actions/runs/39729652221)。这些记录对应迁移 GitHub Pages 之前的版本。
 
-| 检查                          | 结果                                      |
-| ----------------------------- | ----------------------------------------- |
-| `npm ci --include=dev --include=optional` | Node.js 22.11.0 生产环境下成功 |
-| `npm run verify`              | 成功                                      |
-| Astro / TypeScript 检查       | 32 个文件，0 错误、0 警告、0 提示         |
-| 生产构建                      | 13 页、RSS、robots、Sitemap，输出 `dist/` |
-| Node 自动化验收               | 6 组全部通过                              |
-| `.env` 站点地址读取           | 正确读取 `SITE_URL`                       |
-| 非源地址形式的 `SITE_URL`     | 明确抛出 `TypeError`                      |
+| 检查                                      | 结果                                      |
+| ----------------------------------------- | ----------------------------------------- |
+| `npm ci --include=dev --include=optional` | Node.js 22.11.0 生产环境下成功            |
+| `npm run verify`                          | 成功                                      |
+| Astro / TypeScript 检查                   | 32 个文件，0 错误、0 警告、0 提示         |
+| 生产构建                                  | 13 页、RSS、robots、Sitemap，输出 `dist/` |
+| Node 自动化验收                           | 6 组全部通过                              |
+| `.env` 站点地址读取                       | 正确读取 `SITE_URL`                       |
+| 非源地址形式的 `SITE_URL`                 | 明确抛出 `TypeError`                      |
 
 自动化测试覆盖必需路由、页面语义与元数据、图片尺寸与替代文本、Open Graph 文件格式和签名、内部链接及锚点、项目状态和技术内容、robots 与 Sitemap 的源地址一致性。
 
 本环境的 Node 运行时未附带 npm 命令入口，验收使用 `.tools/` 内的临时 npm 工具和关闭遥测的进程环境。该目录已由 Git 忽略；正常 Node.js/npm 安装可直接运行 README 中的命令。
 
-## 浏览器验收
+## GitHub Pages 迁移检查
+
+本轮已分别以根路径 `/` 与项目路径 `/2hard4meTAT/` 完成构建和测试。Astro 检查 34 个文件，结果为 0 错误、0 警告。Linux 环境和线上发布在推送后由新工作流验证。
+
+| 检查                       | 当前记录                           |
+| -------------------------- | ---------------------------------- |
+| 根路径构建与测试           | 构建成功，6 组测试通过             |
+| 项目路径构建与测试         | 构建成功，6 组测试通过             |
+| 链接、媒体、SEO 与订阅路径 | 两轮静态产物测试通过               |
+| Linux 干净安装与检查       | 以新部署工作流记录为准             |
+| Pages 发布和公网访问       | 以对应提交的部署与实际访问结果为准 |
+
+发布地址为 `https://bobby23327.github.io/2hard4meTAT/`；构建配置使用 `SITE_URL=https://bobby23327.github.io` 和 `SITE_BASE=/2hard4meTAT/`。部署工作流与验证方式见 [部署指南](deployment.md)。
+
+## 已完成的浏览器验收
 
 通过本机静态生产预览进行检查：
 
@@ -70,6 +84,6 @@
 
 GitHub 主页与联系邮箱已配置。待补充真实姓名、简历 PDF、游戏截图与录屏、各项目的公开仓库和演示链接，以及实际测试记录。夜班旅馆按开发中展示，Agent Infrastructure 按待完善展示；Unreal 页面以公开技术研究为边界。
 
-上线前设置真实 `SITE_URL`，将代码放入已关联 GitHub 的仓库，并核对 EdgeOne 的生产分支 `main` 与构建目录。当前目录缺少 Git 元数据，既有仓库关联、Webhook 和线上区域表现需在首次发布时验证。推送与发布由站点所有者验收后执行。
+GitHub Pages 的发布源选择 GitHub Actions，推送 `main` 后由工作流构建和部署。生产地址及子路径由工作流统一设置；上线后检查首页、详情、404、静态媒体与分享信息。原 EdgeOne 项目的 Git 集成是否继续启用，需在其控制台确认。
 
 后续先补齐真实项目材料，再按需要增加构建期 GitHub 数据和 CMS；评论与 Agent Demo 的服务端边界见架构文档。

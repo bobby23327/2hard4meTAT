@@ -1,4 +1,5 @@
 ---
+import { withBase } from '../../lib/urls';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ProjectCard from '../../components/ProjectCard.astro';
@@ -19,7 +20,7 @@ const tags = [...new Set(projects.flatMap((project) => project.data.tags))];
         从想法，到可运行的世界<span class="accent">.</span>
       </h1><p>游戏、工具与系统。每个项目，都是一次把问题想清楚的练习。</p>
     </header>
-    <form class="filter-toolbar" role="search" action="/projects/">
+    <form class="filter-toolbar" role="search" action={withBase('/projects/')}>
       <label class="search-field"
         ><Icon name="search" size={18} /><input
           type="search"
@@ -50,7 +51,8 @@ const tags = [...new Set(projects.flatMap((project) => project.data.tags))];
     <div class="filter-meta">
       <div class="tag-select">
         <label for="project-tag">技术栈</label><select id="project-tag" data-tag-select
-          ><option value="">全部技术</option>{tags.map((tag) => <option value={tag}>{tag}</option>)}</select>
+          ><option value="">全部技术</option>{tags.map((tag) => <option value={tag}>{tag}</option>)}</select
+        >
       </div><p data-result-count role="status" aria-live="polite">显示 {projects.length} 个项目</p>
     </div>
     <div class="project-grid project-list-grid" data-results>

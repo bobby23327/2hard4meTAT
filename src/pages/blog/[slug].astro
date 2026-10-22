@@ -1,7 +1,9 @@
 ---
+import { withBase } from '../../lib/urls';
 import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import ContentLink from '../../components/ContentLink.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
 import { formatDate, getReadingTime } from '../../lib/content';
 import { profile } from '../../data/profile';
@@ -26,7 +28,7 @@ const next = articles[position + 1];
 
 <BaseLayout title={article.data.title} description={article.data.description} article>
   <div class="container blog-detail">
-    <a class="back-link" href="/blog/">← 返回技术札记</a><header class="article-header">
+    <a class="back-link" href={withBase('/blog/')}>← 返回技术札记</a><header class="article-header">
       <div class="eyebrow">{article.data.category} / ENGINEERING NOTES</div><h1>{article.data.title}</h1><p>
         {article.data.description}
       </p><div class="article-byline">
@@ -37,7 +39,7 @@ const next = articles[position + 1];
       </div><div class="tags">
         {
           article.data.tags.map((tag) => (
-            <a class="tag" href={`/blog/?tag=${encodeURIComponent(tag)}`}>
+            <a class="tag" href={withBase(`/blog/?tag=${encodeURIComponent(tag)}`)}>
               {tag}
             </a>
           ))
@@ -46,7 +48,7 @@ const next = articles[position + 1];
     </header>
     <div class="reading-layout">
       <article class="prose" data-article>
-        <Content /><div class="article-end">
+        <Content components={{ a: ContentLink }} /><div class="article-end">
           <span class="brand-symbol" aria-hidden="true">[<i></i>]</span><p>
             把过程记录下来，让下一次构建更进一步。
           </p>
@@ -56,14 +58,14 @@ const next = articles[position + 1];
     <nav class="post-navigation" aria-label="相邻文章">
       {
         previous ? (
-          <a href={`/blog/${previous.id}/`}>
+          <a href={withBase(`/blog/${previous.id}/`)}>
             <>
               <span>← 上一篇</span>
               <strong>{previous.data.title}</strong>
             </>
           </a>
         ) : (
-          <a href="/blog/">
+          <a href={withBase('/blog/')}>
             <>
               <span>← 文章列表</span>
               <strong>探索全部技术札记</strong>
@@ -72,14 +74,14 @@ const next = articles[position + 1];
         )
       }{
         next ? (
-          <a href={`/blog/${next.id}/`}>
+          <a href={withBase(`/blog/${next.id}/`)}>
             <>
               <span>下一篇 →</span>
               <strong>{next.data.title}</strong>
             </>
           </a>
         ) : (
-          <a href="/projects/">
+          <a href={withBase('/projects/')}>
             <>
               <span>继续阅读 →</span>
               <strong>看看这些思考来自哪些项目</strong>

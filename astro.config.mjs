@@ -14,9 +14,19 @@ if (!['http:', 'https:'].includes(url.protocol)) {
 if (url.pathname !== '/' || url.search || url.hash || url.username || url.password) {
   throw new TypeError('SITE_URL must contain only an origin, such as https://portfolio.example.');
 }
+const requestedBase = process.env.SITE_BASE ?? '/';
+const baseSegments = requestedBase.split('/');
+if (
+  !/^\/(?:[A-Za-z0-9._~-]+(?:\/[A-Za-z0-9._~-]+)*\/?)?$/.test(requestedBase) ||
+  baseSegments.some((segment) => segment === '.' || segment === '..')
+) {
+  throw new TypeError('SITE_BASE must be an absolute URL path, such as /2hard4meTAT/.');
+}
+const base = requestedBase.endsWith('/') ? requestedBase : `${requestedBase}/`;
 
 export default defineConfig({
   site: url.origin,
+  base,
   output: 'static',
   trailingSlash: 'always',
   integrations: [mdx(), sitemap()],

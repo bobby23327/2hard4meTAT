@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { extname, join, relative, resolve, sep } from 'node:path';
+import { extname, isAbsolute, join, relative, resolve, sep } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import test from 'node:test';
 
@@ -37,6 +37,7 @@ const JPEG_SIGNATURE = Buffer.from([0xff, 0xd8, 0xff]);
 const WEBP_CONTAINER_SIGNATURE = Buffer.from('RIFF');
 const WEBP_FORMAT_SIGNATURE = Buffer.from('WEBP');
 const WEBP_FORMAT_OFFSET = 8;
+const REFERENCE_ATTRIBUTES = ['href', 'src', 'poster', 'data-src'];
 
 function listFiles(directory) {
   assert.ok(existsSync(directory), `Build output missing: ${directory}. Run npm run build first.`);
@@ -97,31 +98,82 @@ function getCanonical(document) {
   return new URL(canonical.attributes.get('href'));
 }
 
-function pageUrl(path, origin) {
+function pageUrl(path) {
   const outputPath = relative(OUTPUT_DIRECTORY, path).split(sep).join('/');
-  return new URL(outputPath.replace(/index\.html$/, ''), `${origin}/`);
+  return new URL(outputPath.replace(/index\.html$/, ''), SITE_URL);
+}
+
+function assertSiteUrl(url) {
+  assert.equal(url.origin, SITE_ORIGIN, `Site URL uses a different origin: ${url.href}`);
+  assert.ok(url.pathname.startsWith(SITE_BASE), `Site URL escapes deployment base ${SITE_BASE}: ${url.href}`);
 }
 
 function resolveOutput(url) {
-  const pathname = decodeURIComponent(url.pathname);
-  const target = resolve(OUTPUT_DIRECTORY, `.${pathname}`);
+  assertSiteUrl(url);
+  const pathname = decodeURIComponent(url.pathname.slice(SITE_BASE.length));
+  const target = resolve(OUTPUT_DIRECTORY, pathname);
   const relativeTarget = relative(OUTPUT_DIRECTORY, target);
-  assert.ok(relativeTarget !== '..' && !relativeTarget.startsWith(`..${sep}`), 'URL escapes build output');
+  assert.ok(
+    !isAbsolute(relativeTarget) && relativeTarget !== '..' && !relativeTarget.startsWith(`..${sep}`),
+    'URL escapes build output',
+  );
   const candidates = [target, join(target, 'index.html')];
   return candidates.find((candidate) => existsSync(candidate) && statSync(candidate).isFile());
 }
 
-function assertInternalReference(value, document, siteOrigin) {
+function assertInternalReference(value, document) {
   assert.ok(value.trim() && value !== '#', `${document.path}: empty reference or placeholder link`);
-  const url = new URL(value, pageUrl(document.path, siteOrigin));
+  const url = new URL(value, pageUrl(document.path));
   assert.notEqual(url.protocol, 'javascript:', `${document.path}: executable URL found`);
-  if (url.origin !== siteOrigin) return;
+  if (url.origin !== SITE_ORIGIN) return;
   const target = resolveOutput(url);
   assert.ok(target, `${document.path}: missing internal destination ${value}`);
   if (!url.hash || extname(target) !== '.html') return;
   const anchor = decodeURIComponent(url.hash.slice(1));
   const targetDocument = DOCUMENTS.get(target);
   assert.ok(targetDocument?.identifiers.has(anchor), `${document.path}: missing anchor ${value}`);
+}
+
+function assertCanonicalUrl(document) {
+  const expected = pageUrl(document.path).href;
+  assert.equal(
+    getCanonical(document).href,
+    expected,
+    `${document.path}: canonical URL differs from its public route`,
+  );
+  const openGraph = document.elements.find(
+    (element) => element.tag === 'meta' && element.attributes.get('property') === 'og:url',
+  );
+  assert.equal(
+    openGraph?.attributes.get('content'),
+    expected,
+    `${document.path}: Open Graph URL differs from its public route`,
+  );
+}
+
+function stylesheetReferences(source) {
+  const references = [...source.matchAll(/url\(\s*(?:"([^"]*)"|'([^']*)'|([^\s)'";]+))\s*\)/gi)];
+  const imports = [...source.matchAll(/@import\s+["']([^"']+)["']/gi)];
+  return [
+    ...references.map((match) => match[1] ?? match[2] ?? match[3]),
+    ...imports.map((match) => match[1]),
+  ];
+}
+
+function scriptReferences(source) {
+  const imports = [...source.matchAll(/\b(?:from\s*|import\s*(?:\(\s*)?)["']([^"']+)["']/g)];
+  const assets = [...source.matchAll(/\bnew\s+URL\(\s*["']([^"']+)["']\s*,\s*import\.meta\.url\s*\)/g)];
+  return [...imports, ...assets].map((match) => match[1]);
+}
+
+function assertAssetDependencies() {
+  for (const path of OUTPUT_FILES) {
+    const extension = extname(path);
+    if (!['.css', '.js', '.mjs'].includes(extension)) continue;
+    const source = readFileSync(path, 'utf8');
+    const references = extension === '.css' ? stylesheetReferences(source) : scriptReferences(source);
+    for (const reference of references) assertInternalReference(reference, { path });
+  }
 }
 
 function assertDocumentMetadata(document) {
@@ -238,13 +290,79 @@ function sitemapLocations(path) {
   );
 }
 
+function xmlElementText(source, name) {
+  const value = source.match(new RegExp(`<${name}\\b[^>]*>([\\s\\S]*?)<\\/${name}>`))?.[1];
+  assert.ok(value?.trim(), `RSS ${name} value missing`);
+  return decodeEntities(value.trim());
+}
+
+function assertFeedItem(item) {
+  const link = new URL(xmlElementText(item, 'link'));
+  const path = resolveOutput(link);
+  const document = DOCUMENTS.get(path);
+  assert.ok(document, `RSS item must reference a built HTML page: ${link.href}`);
+  assert.equal(link.href, getCanonical(document).href, 'RSS item must use the canonical article URL');
+  assert.equal(xmlElementText(item, 'guid'), link.href, 'RSS permalink must match the article URL');
+  return link.href;
+}
+
+function assertFeedUrls(feed) {
+  const channel = feed.split('<item>')[0];
+  assert.equal(xmlElementText(channel, 'link'), SITE_URL.href, 'RSS channel must use the homepage URL');
+  const items = [...feed.matchAll(/<item>([\s\S]*?)<\/item>/g)];
+  const actual = items.map((match) => assertFeedItem(match[1])).sort();
+  const expected = [...DOCUMENTS.keys()]
+    .filter((path) =>
+      /^blog\/[^/]+\/index\.html$/.test(relative(OUTPUT_DIRECTORY, path).split(sep).join('/')),
+    )
+    .map((path) => pageUrl(path).href)
+    .sort();
+  assert.deepEqual(actual, expected, 'RSS must publish each technical article exactly once');
+}
+
+function assertSitemapUrls() {
+  const children = sitemapLocations(join(OUTPUT_DIRECTORY, 'sitemap-index.xml'));
+  assert.ok(children.length > 0, 'Sitemap index must reference at least one sitemap');
+  const actual = children.flatMap((location) => {
+    const path = resolveOutput(location);
+    assert.ok(path, `Sitemap child is missing: ${location.href}`);
+    return sitemapLocations(path).map((page) => {
+      assert.ok(DOCUMENTS.has(resolveOutput(page)), `Sitemap points to an absent page: ${page.href}`);
+      return page.href;
+    });
+  });
+  const expected = [...DOCUMENTS.keys()]
+    .filter((path) => path !== join(OUTPUT_DIRECTORY, '404.html'))
+    .map((path) => pageUrl(path).href);
+  assert.deepEqual(
+    actual.sort(),
+    expected.sort(),
+    'Sitemap must list each public canonical page exactly once',
+  );
+}
+
+function assertRobotsPolicy() {
+  const robots = readFileSync(join(OUTPUT_DIRECTORY, 'robots.txt'), 'utf8');
+  if (['localhost', '127.0.0.1'].includes(SITE_URL.hostname)) {
+    assert.match(robots, /^Disallow: \/$/m, 'Local preview should remain excluded from indexing');
+    return;
+  }
+  const declared = robots.match(/^Sitemap:\s*(\S+)\s*$/m)?.[1];
+  assert.equal(declared, new URL('sitemap-index.xml', SITE_URL).href);
+  assert.match(robots, /^Allow: \/$/m, 'Production robots policy should allow crawling');
+}
+
 const OUTPUT_FILES = listFiles(OUTPUT_DIRECTORY);
 const DOCUMENTS = new Map(
   OUTPUT_FILES.filter((path) => extname(path) === '.html').map((path) => [path, readDocument(path)]),
 );
 const HOMEPAGE = DOCUMENTS.get(join(OUTPUT_DIRECTORY, 'index.html'));
 assert.ok(HOMEPAGE, 'The build must contain a homepage.');
-const SITE_ORIGIN = getCanonical(HOMEPAGE).origin;
+const SITE_URL = getCanonical(HOMEPAGE);
+const SITE_ORIGIN = SITE_URL.origin;
+const SITE_BASE = SITE_URL.pathname;
+assert.ok(SITE_BASE.endsWith('/'), 'Homepage canonical must end with a slash.');
+assert.equal(SITE_URL.search + SITE_URL.hash, '', 'Homepage canonical must omit query and fragment.');
 
 test('required public routes, feed and sitemap are emitted', () => {
   for (const path of [...REQUIRED_PAGES, 'rss.xml', 'robots.txt', 'sitemap-index.xml']) {
@@ -252,7 +370,7 @@ test('required public routes, feed and sitemap are emitted', () => {
   }
   const feed = readFileSync(join(OUTPUT_DIRECTORY, 'rss.xml'), 'utf8');
   assert.match(feed, /<rss\b/);
-  assert.ok([...feed.matchAll(/<item>/g)].length >= 3, 'RSS must publish the initial technical articles');
+  assertFeedUrls(feed);
 });
 
 test('every HTML page has reading landmarks, metadata and stable image dimensions', () => {
@@ -260,7 +378,7 @@ test('every HTML page has reading landmarks, metadata and stable image dimension
     assertDocumentMetadata(document);
     assertDocumentLandmarks(document);
     assertImages(document);
-    assert.equal(getCanonical(document).origin, SITE_ORIGIN, `${document.path}: canonical origin differs`);
+    assertCanonicalUrl(document);
   }
 });
 
@@ -277,37 +395,22 @@ test('Open Graph images resolve locally and use supported raster image formats',
 test('internal links, assets and section fragments resolve in the static build', () => {
   for (const document of DOCUMENTS.values()) {
     for (const element of document.elements) {
-      for (const attribute of ['href', 'src']) {
+      for (const attribute of REFERENCE_ATTRIBUTES) {
         const value = element.attributes.get(attribute);
-        if (value !== undefined) assertInternalReference(value, document, SITE_ORIGIN);
+        if (value !== undefined) assertInternalReference(value, document);
       }
+      const style = element.attributes.get('style');
+      if (style) for (const value of stylesheetReferences(style)) assertInternalReference(value, document);
     }
   }
+  assertAssetDependencies();
 });
 
 test('case studies contain technical substance and accurately labeled project states', () => {
   for (const expectation of PROJECT_EXPECTATIONS) assertProjectContent(expectation);
 });
 
-test('robots policy and all sitemap URLs agree with the built canonical site origin', () => {
-  const index = join(OUTPUT_DIRECTORY, 'sitemap-index.xml');
-  const children = sitemapLocations(index);
-  assert.ok(children.length > 0, 'Sitemap index must reference at least one sitemap');
-  for (const location of children) {
-    assert.equal(location.origin, SITE_ORIGIN, 'Sitemap index uses a different site origin');
-    const path = resolveOutput(location);
-    assert.ok(path, `Sitemap child is missing: ${location.href}`);
-    for (const page of sitemapLocations(path)) {
-      assert.equal(page.origin, SITE_ORIGIN, 'Sitemap page uses a different site origin');
-      assert.ok(resolveOutput(page), `Sitemap points to an absent page: ${page.href}`);
-    }
-  }
-  const robots = readFileSync(join(OUTPUT_DIRECTORY, 'robots.txt'), 'utf8');
-  if (['localhost', '127.0.0.1'].includes(new URL(SITE_ORIGIN).hostname)) {
-    assert.match(robots, /^Disallow: \/$/m, 'Local preview should remain excluded from indexing');
-  } else {
-    const declared = robots.match(/^Sitemap:\s*(\S+)\s*$/m)?.[1];
-    assert.equal(declared, new URL('/sitemap-index.xml', SITE_ORIGIN).href);
-    assert.match(robots, /^Allow: \/$/m, 'Production robots policy should allow crawling');
-  }
+test('robots policy and sitemap URLs agree with the deployment base and canonical pages', () => {
+  assertSitemapUrls();
+  assertRobotsPolicy();
 });

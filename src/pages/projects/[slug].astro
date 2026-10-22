@@ -1,8 +1,10 @@
 ---
+import { withBase } from '../../lib/urls';
 import { getCollection, render } from 'astro:content';
 import type { CollectionEntry } from 'astro:content';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import MediaGallery from '../../components/MediaGallery.astro';
+import ContentLink from '../../components/ContentLink.astro';
 import TableOfContents from '../../components/TableOfContents.astro';
 import Icon from '../../components/Icon.astro';
 import { tracks, statusLabels } from '../../data/tracks';
@@ -34,7 +36,7 @@ const posts = project.data.relatedPosts.map((id) => {
   article
 >
   <div class="container case-page">
-    <a class="back-link" href="/projects/">← 返回项目</a>
+    <a class="back-link" href={withBase('/projects/')}>← 返回项目</a>
     <header class="case-header">
       <div class="eyebrow">{track.english} <span class="eyebrow-separator">/</span> CASE STUDY</div><h1>
         {project.data.title}<span class="accent">.</span>
@@ -50,7 +52,7 @@ const posts = project.data.relatedPosts.map((id) => {
           <span class="metadata-label">技术栈</span><div class="tags">
             {
               project.data.tags.map((tag) => (
-                <a class="tag" href={`/projects/?tag=${encodeURIComponent(tag)}`}>
+                <a class="tag" href={withBase(`/projects/?tag=${encodeURIComponent(tag)}`)}>
                   {tag}
                 </a>
               ))
@@ -59,7 +61,7 @@ const posts = project.data.relatedPosts.map((id) => {
         </div><div>
           <span class="metadata-label">方向</span><a
             class="text-link"
-            href={`/projects/?track=${project.data.track}`}>{track.label} ↗</a
+            href={withBase(`/projects/?track=${project.data.track}`)}>{track.label} ↗</a
           >
         </div>
       </div>
@@ -67,13 +69,13 @@ const posts = project.data.relatedPosts.map((id) => {
     <MediaGallery media={project.data.media} title={project.data.title} />
     <div class="reading-layout">
       <article class="prose" data-article>
-        <Content /><section class="project-resources">
+        <Content components={{ a: ContentLink }} /><section class="project-resources">
           <h2 id="resources">项目资源</h2><div class="resource-links">
             {
               project.data.github && (
                 <a
                   class="button secondary"
-                  href={project.data.github}
+                  href={withBase(project.data.github)}
                   target="_blank"
                   rel="noopener noreferrer"
                 >
@@ -82,7 +84,12 @@ const posts = project.data.relatedPosts.map((id) => {
               )
             }{
               project.data.demo && (
-                <a class="button primary" href={project.data.demo} target="_blank" rel="noopener noreferrer">
+                <a
+                  class="button primary"
+                  href={withBase(project.data.demo)}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                >
                   运行 Demo <Icon name="external" size={18} />
                 </a>
               )
@@ -93,7 +100,7 @@ const posts = project.data.relatedPosts.map((id) => {
             <section class="related-reading">
               <h2 id="related-reading">延伸阅读</h2>
               {posts.map((post) => (
-                <a href={`/blog/${post.id}/`}>
+                <a href={withBase(`/blog/${post.id}/`)}>
                   {post.data.title}
                   <span>↗</span>
                 </a>
@@ -103,7 +110,7 @@ const posts = project.data.relatedPosts.map((id) => {
         }
       </article><TableOfContents headings={headings} />
     </div>
-    <a class="end-link" href="/projects/"
+    <a class="end-link" href={withBase('/projects/')}
       ><span class="eyebrow">KEEP EXPLORING</span><span>继续探索项目 <Icon name="arrow" size={26} /></span></a
     >
   </div>

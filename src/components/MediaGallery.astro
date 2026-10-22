@@ -1,4 +1,5 @@
 ---
+import { withBase } from '../lib/urls';
 import Icon from './Icon.astro';
 interface Media {
   src: string;
@@ -19,7 +20,7 @@ if (!first) throw new RangeError('A media gallery requires at least one image.')
     <button type="button" data-open-gallery aria-label="放大当前图片"
       ><img
         data-gallery-image
-        src={first.src}
+        src={withBase(first.src)}
         alt={first.alt}
         width="1200"
         height="750"
@@ -33,14 +34,14 @@ if (!first) throw new RangeError('A media gallery requires at least one image.')
         <button
           type="button"
           data-gallery-thumb
-          data-src={item.src}
+          data-src={withBase(item.src)}
           data-alt={item.alt}
           data-caption={item.caption}
           aria-label={`查看图片 ${index + 1}：${item.alt}`}
           aria-pressed={index === 0}
         >
           <>
-            <img src={item.src} alt="" width="120" height="75" loading="lazy" />
+            <img src={withBase(item.src)} alt="" width="120" height="75" loading="lazy" />
             <span class="mono">0{index + 1}</span>
           </>
         </button>
@@ -53,10 +54,11 @@ if (!first) throw new RangeError('A media gallery requires at least one image.')
         class="icon-button"
         type="button"
         data-close-gallery
-        aria-label="关闭图片查看器"><Icon name="close" size={24} /></button>
+        aria-label="关闭图片查看器"><Icon name="close" size={24} /></button
+      >
     </div><img
       data-lightbox-image
-      src={first.src}
+      src={withBase(first.src)}
       alt={first.alt}
       width="1200"
       height="750"
@@ -68,7 +70,8 @@ if (!first) throw new RangeError('A media gallery requires at least one image.')
         class="button quiet"
         type="button"
         data-gallery-next
-        aria-label="下一张图片">下一张 →</button>
+        aria-label="下一张图片">下一张 →</button
+      >
     </div>
   </dialog>
 </section>

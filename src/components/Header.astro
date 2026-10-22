@@ -1,4 +1,5 @@
 ---
+import { withBase } from '../lib/urls';
 import Icon from './Icon.astro';
 import { profile } from '../data/profile';
 const links = [
@@ -8,11 +9,13 @@ const links = [
   { href: '/about/', label: '关于' },
 ];
 const pathname = Astro.url.pathname;
+const isCurrent = (href: string) =>
+  href === '/' ? pathname === withBase('/') : pathname.startsWith(withBase(href));
 ---
 
 <header class="site-header">
   <div class="container nav-bar">
-    <a class="brand" href="/" aria-label={`${profile.name}，首页`}
+    <a class="brand" href={withBase('/')} aria-label={`${profile.name}，首页`}
       ><span class="brand-symbol" aria-hidden="true">[<i></i>]</span><span
         >{profile.name}<span class="brand-sub">{profile.brandEnglish}</span></span
       ></a
@@ -20,10 +23,7 @@ const pathname = Astro.url.pathname;
     <nav id="main-navigation" aria-label="主导航">
       {
         links.map(({ href, label }) => (
-          <a
-            href={href}
-            aria-current={(href === '/' ? pathname === '/' : pathname.startsWith(href)) ? 'page' : undefined}
-          >
+          <a href={withBase(href)} aria-current={isCurrent(href) ? 'page' : undefined}>
             {label}
           </a>
         ))
@@ -34,7 +34,8 @@ const pathname = Astro.url.pathname;
         ><span class="theme-sun"><Icon name="sun" /></span><span class="theme-moon"><Icon name="moon" /></span
         ></button
       >
-      <a class="nav-contact" href="/about/#contact">认识一下 <Icon name="external" size={16} /></a>
+      <a class="nav-contact" href={withBase('/about/#contact')}>认识一下 <Icon name="external" size={16} /></a
+      >
       <button
         class="icon-button menu-toggle"
         type="button"

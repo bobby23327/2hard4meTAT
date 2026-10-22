@@ -1,4 +1,5 @@
 ---
+import { withBase } from '../lib/urls';
 import { getCollection } from 'astro:content';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import Icon from '../components/Icon.astro';
@@ -28,10 +29,9 @@ const articles = (await getCollection('blog')).sort(
             profile.heroPersonalNote
           }
         </p><div class="hero-actions">
-          <a class="button primary" href="/projects/">探索我的项目 <Icon name="arrow" size={18} /></a><a
-            class="button quiet"
-            href="/about/">关于我 <Icon name="external" size={18} /></a
-          >
+          <a class="button primary" href={withBase('/projects/')}
+            >探索我的项目 <Icon name="arrow" size={18} /></a
+          ><a class="button quiet" href={withBase('/about/')}>关于我 <Icon name="external" size={18} /></a>
         </div><div class="hero-footnote mono">
           <span>{profile.universityEnglish}</span><span class="small-divider"></span><span
             >CLASS OF {profile.graduation}</span
@@ -41,10 +41,12 @@ const articles = (await getCollection('blog')).sort(
       <HeroVisual />
     </section>
     <div class="direction-strip">
-      <span class="strip-label mono">FOCUS AREAS</span><a href="/projects/?track=game"
+      <span class="strip-label mono">FOCUS AREAS</span><a href={withBase('/projects/?track=game')}
         ><Icon name="grid" size={17} />Game Development<span>01</span></a
-      ><a href="/projects/?track=engine"><Icon name="code" size={18} />C++ Systems<span>02</span></a><a
-        href="/projects/?track=agent"><Icon name="layers" size={18} />Agent Infrastructure<span>03</span></a
+      ><a href={withBase('/projects/?track=engine')}
+        ><Icon name="code" size={18} />C++ Systems<span>02</span></a
+      ><a href={withBase('/projects/?track=agent')}
+        ><Icon name="layers" size={18} />Agent Infrastructure<span>03</span></a
       >
     </div>
     <section class="section featured-section">
@@ -52,7 +54,7 @@ const articles = (await getCollection('blog')).sort(
         index="01"
         title="精选项目"
         english="SELECTED PROJECTS"
-        href="/projects/"
+        href={withBase('/projects/')}
         linkText="全部项目"
       /><div class="project-grid">
         {
@@ -68,23 +70,23 @@ const articles = (await getCollection('blog')).sort(
         <div class="engineering-intro">
           <span class="eyebrow">BEYOND THE SURFACE</span><h3>好体验的背后，<br />是有依据的设计。</h3><p>
             从运行时架构到编辑器工具，记录系统如何拆分、协作与演进。
-          </p><a class="text-link" href="/projects/?track=engine"
+          </p><a class="text-link" href={withBase('/projects/?track=engine')}
             >探索工程实践 <Icon name="arrow" size={17} /></a
           >
         </div><div class="engineering-rows">
-          <a href="/projects/mcards/"
+          <a href={withBase('/projects/mcards/')}
             ><span class="engineering-number mono">01</span><div>
               <span class="mono">ARCHITECTURE / C#</span><h4>让模拟逻辑独立于游戏引擎</h4><p>
                 纯 C# 核心 · 命令接口 · 只读状态快照
               </p>
             </div><Icon name="external" /></a
-          ><a href="/projects/unreal-tools/"
+          ><a href={withBase('/projects/unreal-tools/')}
             ><span class="engineering-number mono">02</span><div>
               <span class="mono">ENGINE & TOOLS / C++</span><h4>走进 Unreal 编辑器</h4><p>
                 反射属性路径 · Details 面板 · Slate 控件
               </p>
             </div><Icon name="external" /></a
-          ><a href="/projects/agent-infrastructure/"
+          ><a href={withBase('/projects/agent-infrastructure/')}
             ><span class="engineering-number mono">03</span><div>
               <span class="mono">AGENT INFRASTRUCTURE</span><h4>探索 Agent 的执行边界</h4><p>
                 工作流与任务隔离 · 内容整理中
@@ -99,7 +101,7 @@ const articles = (await getCollection('blog')).sort(
         index="03"
         title="技术札记"
         english="ENGINEERING NOTES"
-        href="/blog/"
+        href={withBase('/blog/')}
         linkText="全部文章"
       /><div class="article-list">
         {articles.slice(0, 3).map((article) => <ArticleRow article={article} />)}
@@ -111,7 +113,9 @@ const articles = (await getCollection('blog')).sort(
           关注{profile.location}的{profile.opportunityFocus}机会。
         </p>
       </div><div class="contact-actions">
-        <a class="button primary" href="/about/#contact">联系与简历 <Icon name="external" size={18} /></a>{
+        <a class="button primary" href={withBase('/about/#contact')}
+          >联系与简历 <Icon name="external" size={18} /></a
+        >{
           profile.github && (
             <a class="text-link" href={profile.github}>
               GitHub <Icon name="github" size={17} />

@@ -6,10 +6,10 @@
 
 ## 1. 本地启动
 
-推荐使用 Node.js 22.11+ 与 npm：
+使用 `.nvmrc` 指定的 Node.js 22.11.0 与 npm：
 
 ```sh
-npm ci
+npm ci --include=dev --include=optional
 npm run dev
 ```
 
@@ -61,17 +61,17 @@ npm run preview
 
 ## 7. 通过 GitHub 更新线上站点
 
-代码仓库为 [bobby23327/2hard4meTAT](https://github.com/bobby23327/2hard4meTAT)，生产分支为 `main`。本目录交付时缺少 Git 元数据，首次提交前需关联该远程仓库，并在 EdgeOne 控制台核对 Git 集成。检查改动并运行 `npm run verify` 后，由站点所有者提交和推送。EdgeOne 按生产分支配置触发构建。
+代码仓库为 [bobby23327/2hard4meTAT](https://github.com/bobby23327/2hard4meTAT)，生产分支为 `main`，发布地址为 [bobby23327.github.io/2hard4meTAT/](https://bobby23327.github.io/2hard4meTAT/)。
 
-仓库内 `edgeone.json` 配置安装命令 `npm ci --include=dev --include=optional`、构建命令 `npm run check && npm run build` 和产物目录 `dist`。`.npmrc` 确保开发依赖与平台原生包参与安装，并检查 Node 版本兼容性。上线前在平台设置 `SITE_URL` 为真实 HTTPS 站点源地址；本地默认值为 `http://localhost:4321`。
+`.github/workflows/deploy.yml` 在 Linux、Node.js 22.11.0 下执行干净安装、类型检查、静态构建与测试，再将 `dist/` 部署到 GitHub Pages。推送到 `main` 自动发布；Pull Request 执行检查；在 Actions 页面也可手动运行工作流。仓库的 **Settings → Pages → Source** 应选择 **GitHub Actions**。
 
-GitHub Actions 使用 `.nvmrc` 指定的 Node.js 22.11.0，在 Linux 生产环境执行干净安装和 `npm run verify`。构建工具版本的兼容约束见 [部署指南](docs/deployment.md#构建依赖兼容性)。
+部署工作流设置 `SITE_URL=https://bobby23327.github.io` 和 `SITE_BASE=/2hard4meTAT/`，用于生成页面链接、静态资源、canonical、RSS 和 Sitemap。本地默认使用 `http://localhost:4321` 与根路径 `/`。项目内的资源路径仍按 `/images/`、`/media/` 等填写，由路径工具统一添加部署前缀。
 
-本次实现保留在本地，推送与发布由站点所有者决定。区域、域名、免费计划及首次部署检查见 [部署指南](docs/deployment.md)。
+`.npmrc` 和显式安装参数确保开发依赖与平台原生包参与安装。配置、子路径预览、发布与回滚步骤见 [部署指南](docs/deployment.md)。
 
 ## 8. 添加服务端动态功能
 
-先按需添加独立 API，静态页面继续保留。GitHub 数据可先在构建时更新；评论、CMS 发布和 Agent Demo 再接入 EdgeOne Functions，并为需要保存的状态配置 KV 或 Blob。密钥仅在构建端或服务端读取。
+GitHub Pages 托管静态页面。GitHub 数据可在构建时更新；评论、CMS 发布和 Agent Demo 按需接入独立 API 服务，并为需要保存的状态配置数据库或对象存储。密钥仅在构建端或服务端读取。
 
 运行边界、审核、校验、限流和 SSR 迁移方案见 [架构说明](docs/architecture.md)。
 

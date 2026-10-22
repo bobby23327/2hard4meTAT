@@ -1,17 +1,18 @@
 ---
+import { withBase } from '../lib/urls';
 import Icon from './Icon.astro';
 import { profile } from '../data/profile';
 ---
 
 <footer class="site-footer container">
   <div>
-    <a class="footer-brand" href="/">{profile.name}<span class="accent">.</span></a><p>
+    <a class="footer-brand" href={withBase('/')}>{profile.name}<span class="accent">.</span></a><p>
       {profile.footerDescription}
     </p>
   </div>
   <div class="footer-links">
-    <a href="/projects/">项目</a><a href="/about/#contact">联系与简历</a><a
-      href="/rss.xml"
+    <a href={withBase('/projects/')}>项目</a><a href={withBase('/about/#contact')}>联系与简历</a><a
+      href={withBase('/rss.xml')}
       aria-label="订阅 RSS"><Icon name="rss" size={14} /> RSS</a
     >
   </div>
